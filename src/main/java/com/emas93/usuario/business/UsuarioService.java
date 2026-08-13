@@ -4,10 +4,12 @@ import com.emas93.usuario.controller.dtos.UsuarioDTO;
 import com.emas93.usuario.converter.UsuarioConverter;
 import com.emas93.usuario.infrastructure.entity.Usuario;
 import com.emas93.usuario.infrastructure.exceptions.ConflictException;
+import com.emas93.usuario.infrastructure.exceptions.ResourceNotFoundException;
 import com.emas93.usuario.infrastructure.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Service
 @RequiredArgsConstructor
@@ -32,14 +34,27 @@ public class UsuarioService {
                 throw new ConflictException("E-mail já cadastrado " + email);
             }
         } catch (ConflictException e) {
-            throw new ConflictException("Email já cadastrado " + e.getCause());
+            throw new ConflictException("E-mail já cadastrado " + e.getCause());
         }
     }
-
 
     public boolean verificaEmailExistente(String email) {
         return usuarioRepository.existsByEmail(email);
     }
 
 
+    public UsuarioDTO buscarUsuarioPorEmail(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("E-mail não encontrado." + email));
+        return usuarioConverter.paraUsuarioDTO(usuario);
+    }
+
+    public void deletaUsuarioPorEmail(String email) {
+        usuarioRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("E-mail não existe na base de dados. " + email));
+        usuarioRepository.deleteByEmail(email);
+    }
+
+
 }
+
+
+
