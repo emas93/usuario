@@ -2,7 +2,6 @@ package com.emas93.usuario.controller;
 
 import com.emas93.usuario.business.UsuarioService;
 import com.emas93.usuario.controller.dtos.UsuarioDTO;
-import com.emas93.usuario.infrastructure.entity.Usuario;
 import com.emas93.usuario.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
