@@ -6,9 +6,11 @@ import com.emas93.usuario.infrastructure.entity.Usuario;
 import com.emas93.usuario.infrastructure.exceptions.ConflictException;
 import com.emas93.usuario.infrastructure.exceptions.ResourceNotFoundException;
 import com.emas93.usuario.infrastructure.repository.UsuarioRepository;
+import com.emas93.usuario.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +18,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioConverter usuarioConverter;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     public UsuarioDTO salvaUsuario(UsuarioDTO usuarioDTO) {
         // Recebe um usuarioDTO > converte para usuario entity, salva no repository como entity
@@ -50,6 +53,23 @@ public class UsuarioService {
     public void deletaUsuarioPorEmail(String email) {
         usuarioRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("E-mail não existe na base de dados. " + email));
         usuarioRepository.deleteByEmail(email);
+    }
+
+
+    public UsuarioDTO alteraDadosUsuario(String token, UsuarioDTO usuarioDTO) {
+        //Buscando (extraindo) o usuário via token para não ter que passar o e-mail obrigatóriamente
+        //e removendo o bearer.
+        String email = jwtUtil.extrairEmailToken(token.substring(7));
+        //Criptografa a nova senha caso o usuário informe.
+        usuarioDTO.setSenha(usuarioDTO.getSenha() != null? passwordEncoder.encode(usuarioDTO.getSenha()): null);
+
+        //Se encontrar, guarda o e-mail.se não encontrar o email do usuario lança a exceção.
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Email não encontrado" + email));
+        //Guarda as informações de acordo com os campos que são informados ou não no body (regra no updateUsuario)
+        Usuario usuarioEntity = usuarioConverter.updateUsuario(usuarioDTO, usuario);
+
+        //Converte a entity para dto > para retornar no body
+        return usuarioConverter.paraUsuarioDTO(usuarioRepository.save(usuarioEntity));
     }
 
 
