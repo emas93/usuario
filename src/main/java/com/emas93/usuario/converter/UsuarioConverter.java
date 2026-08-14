@@ -91,5 +91,4 @@ public class UsuarioConverter {
                 .numeroTelefone((telefone.getNumeroTelefone()))
                 .build();
     }
-
 }
