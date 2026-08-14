@@ -20,8 +20,8 @@ public class UsuarioController {
 
 
     @PostMapping
-    public ResponseEntity<UsuarioDTO> salvaUsuario(@RequestBody UsuarioDTO usuarioDTO){
-       return ResponseEntity.ok(usuarioService.salvaUsuario(usuarioDTO));
+    public ResponseEntity<UsuarioDTO> salvaUsuario(@RequestBody UsuarioDTO usuarioDTO) {
+        return ResponseEntity.ok(usuarioService.salvaUsuario(usuarioDTO));
     }
 
     @PostMapping("/login")
@@ -42,4 +42,10 @@ public class UsuarioController {
         usuarioService.deletaUsuarioPorEmail(email);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping
+    public ResponseEntity<UsuarioDTO> alteraDadosUsuario(@RequestBody UsuarioDTO usuarioDTO, @RequestHeader ("Authorization") String token) {
+        return ResponseEntity.ok(usuarioService.alteraDadosUsuario(token,usuarioDTO));
+    }
+
 }

@@ -91,4 +91,16 @@ public class UsuarioConverter {
                 .numeroTelefone((telefone.getNumeroTelefone()))
                 .build();
     }
+
+    public Usuario updateUsuario(UsuarioDTO usuarioDTO, Usuario usuario){
+        return Usuario.builder()
+                .nome(usuarioDTO.getNome() != null ? usuarioDTO.getNome(): usuario.getNome() )
+                .id(usuario.getId())
+                .email(usuarioDTO.getEmail() != null ? usuarioDTO.getEmail(): usuario.getEmail())
+                .senha(usuarioDTO.getSenha() !=null ? usuarioDTO.getSenha(): usuario.getSenha())
+                .enderecos(usuario.getEnderecos())
+                .telefones(usuario.getTelefones())
+                .build();
+
+    }
 }
