@@ -1,6 +1,8 @@
 package com.emas93.usuario.controller;
 
 import com.emas93.usuario.business.UsuarioService;
+import com.emas93.usuario.controller.dtos.EnderecoDTO;
+import com.emas93.usuario.controller.dtos.TelefoneDTO;
 import com.emas93.usuario.controller.dtos.UsuarioDTO;
 import com.emas93.usuario.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +34,7 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public ResponseEntity<UsuarioDTO> buscaUsuarioPorEmail(@RequestParam String email) {
+    public ResponseEntity<UsuarioDTO> buscaUsuarioPorEmail(@RequestParam("email") String email) {
         return ResponseEntity.ok(usuarioService.buscarUsuarioPorEmail(email));
 
     }
@@ -46,6 +48,16 @@ public class UsuarioController {
     @PutMapping
     public ResponseEntity<UsuarioDTO> alteraDadosUsuario(@RequestBody UsuarioDTO usuarioDTO, @RequestHeader ("Authorization") String token) {
         return ResponseEntity.ok(usuarioService.alteraDadosUsuario(token,usuarioDTO));
+    }
+
+    @PutMapping("/endereco")
+    public ResponseEntity<EnderecoDTO> alteraDadosEndereco(@RequestBody EnderecoDTO enderecoDTO, @RequestParam("id") Long id){
+        return ResponseEntity.ok(usuarioService.alteraDadosEndereco(id,enderecoDTO));
+    }
+
+    @PutMapping("/telefone")
+    public ResponseEntity<TelefoneDTO> alteraDadosTelefone(@RequestBody TelefoneDTO telefoneDTO, @RequestParam("id") Long id){
+        return ResponseEntity.ok(usuarioService.alteraDadosTelefone(id,telefoneDTO));
     }
 
 }

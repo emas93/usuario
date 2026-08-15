@@ -1,10 +1,16 @@
 package com.emas93.usuario.business;
 
+import com.emas93.usuario.controller.dtos.EnderecoDTO;
+import com.emas93.usuario.controller.dtos.TelefoneDTO;
 import com.emas93.usuario.controller.dtos.UsuarioDTO;
 import com.emas93.usuario.converter.UsuarioConverter;
+import com.emas93.usuario.infrastructure.entity.Endereco;
+import com.emas93.usuario.infrastructure.entity.Telefone;
 import com.emas93.usuario.infrastructure.entity.Usuario;
 import com.emas93.usuario.infrastructure.exceptions.ConflictException;
 import com.emas93.usuario.infrastructure.exceptions.ResourceNotFoundException;
+import com.emas93.usuario.infrastructure.repository.EnderecoRepository;
+import com.emas93.usuario.infrastructure.repository.TelefoneRepository;
 import com.emas93.usuario.infrastructure.repository.UsuarioRepository;
 import com.emas93.usuario.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +22,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
+    private final EnderecoRepository enderecoRepository;
+    private final TelefoneRepository telefoneRepository;
     private final UsuarioConverter usuarioConverter;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -46,8 +54,7 @@ public class UsuarioService {
 
 
     public UsuarioDTO buscarUsuarioPorEmail(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("E-mail não encontrado." + email));
-        return usuarioConverter.paraUsuarioDTO(usuario);
+        return usuarioConverter.paraUsuarioDTO(usuarioRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("E-mail não encontrado." + email)));
     }
 
     public void deletaUsuarioPorEmail(String email) {
@@ -70,6 +77,18 @@ public class UsuarioService {
 
         //Converte a entity para dto > para retornar no body
         return usuarioConverter.paraUsuarioDTO(usuarioRepository.save(usuarioEntity));
+    }
+
+    public EnderecoDTO alteraDadosEndereco(Long id,EnderecoDTO enderecoDTO){
+        Endereco enderecoInformado = enderecoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id " + id + " endereço não existe na base de dados."));
+         enderecoInformado = usuarioConverter.updateEndereco(enderecoDTO,enderecoInformado);
+        return usuarioConverter.paraEnderecoDTOS(enderecoRepository.save(enderecoInformado));
+    }
+
+    public TelefoneDTO alteraDadosTelefone(Long id, TelefoneDTO telefoneDTO){
+        Telefone telefoneInformado = telefoneRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id " + id + " telefone não existe na base de dados."));
+        telefoneInformado = usuarioConverter.updateTelefone(telefoneDTO,telefoneInformado);
+        return usuarioConverter.paraTelefoneDTOS(telefoneRepository.save(telefoneInformado));
     }
 
 
