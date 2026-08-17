@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.swing.*;
+
 
 @Service
 @RequiredArgsConstructor
@@ -68,7 +70,7 @@ public class UsuarioService {
         //e removendo o bearer.
         String email = jwtUtil.extrairEmailToken(token.substring(7));
         //Criptografa a nova senha caso o usuário informe.
-        usuarioDTO.setSenha(usuarioDTO.getSenha() != null? passwordEncoder.encode(usuarioDTO.getSenha()): null);
+        usuarioDTO.setSenha(usuarioDTO.getSenha() != null ? passwordEncoder.encode(usuarioDTO.getSenha()) : null);
 
         //Se encontrar, guarda o e-mail.se não encontrar o email do usuario lança a exceção.
         Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Email não encontrado" + email));
@@ -79,18 +81,37 @@ public class UsuarioService {
         return usuarioConverter.paraUsuarioDTO(usuarioRepository.save(usuarioEntity));
     }
 
-    public EnderecoDTO alteraDadosEndereco(Long id,EnderecoDTO enderecoDTO){
+    public EnderecoDTO alteraDadosEndereco(Long id, EnderecoDTO enderecoDTO) {
         Endereco enderecoInformado = enderecoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id " + id + " endereço não existe na base de dados."));
-         enderecoInformado = usuarioConverter.updateEndereco(enderecoDTO,enderecoInformado);
+        enderecoInformado = usuarioConverter.updateEndereco(enderecoDTO, enderecoInformado);
         return usuarioConverter.paraEnderecoDTOS(enderecoRepository.save(enderecoInformado));
     }
 
-    public TelefoneDTO alteraDadosTelefone(Long id, TelefoneDTO telefoneDTO){
+    public TelefoneDTO alteraDadosTelefone(Long id, TelefoneDTO telefoneDTO) {
         Telefone telefoneInformado = telefoneRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Id " + id + " telefone não existe na base de dados."));
-        telefoneInformado = usuarioConverter.updateTelefone(telefoneDTO,telefoneInformado);
+        telefoneInformado = usuarioConverter.updateTelefone(telefoneDTO, telefoneInformado);
         return usuarioConverter.paraTelefoneDTOS(telefoneRepository.save(telefoneInformado));
     }
 
+    public EnderecoDTO cadastraEndereco(String token, EnderecoDTO enderecoDTO) {
+        //por meio do token, vamos  adicionar o endereco por meio do email usuario
+        String emailUsuario = jwtUtil.extrairEmailToken(token.substring(7));
+        //encontra o usuario pelo seu email
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuario).orElseThrow(() -> new ResourceNotFoundException("Email não encontrado" + emailUsuario));
+        //se encontrar o email, adiciona o novo endereco ao id usuario
+        Endereco enderecoEntity = usuarioConverter.paraEnderecoEntity(enderecoDTO, usuario.getId());
+        enderecoEntity = enderecoRepository.save(enderecoEntity);
+        return usuarioConverter.paraEnderecoDTOS(enderecoEntity);
+    }
+
+    public TelefoneDTO cadastraTelefone(String token, TelefoneDTO telefoneDTO) {
+
+        String emailUsuario = jwtUtil.extrairEmailToken(token.substring(7));
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuario).orElseThrow(() -> new ResourceNotFoundException("Email não encontrado" + emailUsuario));
+        Telefone telefoneEntity = usuarioConverter.paraTelefoneEntity(telefoneDTO, usuario.getId());
+        telefoneEntity = telefoneRepository.save(telefoneEntity);
+        return usuarioConverter.paraTelefoneDTOS(telefoneEntity);
+    }
 
 }
 
